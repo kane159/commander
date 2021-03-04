@@ -111,7 +111,7 @@ set(WITH_SYSTEM_SDL_TTF OFF CACHE BOOL "Use system sdl_ttf")
 set(WITH_SYSTEM_SDL_GFX OFF CACHE BOOL "Use system sdl_gfx")
 
 set(TARGET_PLATFORM host CACHE STRING "Target platform")
-set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS host retrofw gcw0 rg350 rs90)
+set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS host retrofw gcw0 rg350 rs90 funkey-s)
 
 if(TARGET_PLATFORM STREQUAL "retrofw")
   include(CMake/retrofw_defs.cmake)
@@ -121,9 +121,11 @@ elseif(TARGET_PLATFORM STREQUAL "rg350")
   include(CMake/rg350_defs.cmake)
 elseif(TARGET_PLATFORM STREQUAL "rs90")
   include(CMake/rs90_defs.cmake)
+elseif(TARGET_PLATFORM STREQUAL "funkey-s")
+  include(CMake/funkey-s_defs.cmake)
 endif()
 
-# These variables are passed as C macro definitons if they exist.
+# These variables are passed as C macro definitions if they exist.
 foreach(
   def_name
   SCREEN_WIDTH
@@ -147,6 +149,7 @@ foreach(
   MYKEY_OPERATION
   MYKEY_SELECT
   MYKEY_TRANSFER
+  MYKEY_MENU
 )
   if(DEFINED ${def_name})
     list(APPEND def_list ${def_name}=${${def_name}})

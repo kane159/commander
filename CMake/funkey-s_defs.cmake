@@ -1,0 +1,18 @@
+
+set(PATH_DEFAULT \"/mnt\")
+set(FILE_SYSTEM \"/dev/mmcblk0p4\")
+
+set(MYKEY_UP SDLK_u) # Up
+set(MYKEY_RIGHT SDLK_r) # Right
+set(MYKEY_DOWN SDLK_d) # Down
+set(MYKEY_LEFT SDLK_l) # Left
+
+set(MYKEY_SYSTEM SDLK_y) # Y
+set(MYKEY_PAGEUP SDLK_m) # L
+set(MYKEY_PAGEDOWN SDLK_n) # R
+set(MYKEY_OPEN SDLK_a) # A
+set(MYKEY_PARENT SDLK_b) # B
+set(MYKEY_OPERATION SDLK_x) # X
+set(MYKEY_SELECT SDLK_k) # SELECT
+set(MYKEY_TRANSFER SDLK_s) # START
+set(MYKEY_MENU SDLK_q) # MENU

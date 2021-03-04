@@ -3,6 +3,7 @@ declare -ra VALID_TARGETS=(
   retrofw
   rg350
   rs90
+  funkey-s
 )
 
 usage_target() {
