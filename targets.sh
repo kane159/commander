@@ -4,6 +4,7 @@ declare -ra VALID_TARGETS=(
   rg350
   rs90
   rg99
+  funkey-s
 )
 
 usage_target() {

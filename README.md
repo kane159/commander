@@ -30,6 +30,14 @@ BUILDROOT=<path to buildroot> ./build.sh rg350
 
 The package will be built at `build-retrofw/commander.ipk`.
 
+To build for FunKey S, run:
+
+```bash
+TOOLCHAIN=<path to toolchain> ./build.sh funkey-s
+```
+
+The package will be built at `build-funkey-s/commander-funkey-s.opk`.
+
 To build for the host system, run:
 
 ```bash

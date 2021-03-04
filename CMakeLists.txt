@@ -17,6 +17,8 @@ elseif(TARGET_PLATFORM STREQUAL "rs90")
   include(CMake/rs90_defs.cmake)
 elseif(TARGET_PLATFORM STREQUAL "rg99")
   include(CMake/rg99_defs.cmake)
+elseif(TARGET_PLATFORM STREQUAL "funkey-s")
+  include(CMake/funkey-s_defs.cmake)
 endif()
 
 option(USE_SDL2 "Use SDL2 instead of SDL1" ON)
@@ -185,7 +187,7 @@ foreach(
 endforeach(def_name)
 
 
-# These variables are passed as C macro definitons if they exist.
+# These variables are passed as C macro definitions if they exist.
 foreach(
   def_name
   SCREEN_WIDTH
@@ -209,6 +211,7 @@ foreach(
   MYKEY_OPERATION
   MYKEY_SELECT
   MYKEY_TRANSFER
+  MYKEY_MENU
 )
   if(DEFINED ${def_name})
     list(APPEND def_list ${def_name}=${${def_name}})
