@@ -1,6 +1,7 @@
 
 set(PATH_DEFAULT \"/mnt\")
 set(FILE_SYSTEM \"/dev/mmcblk0p4\")
+set(SCREEN_WIDTH 240)
 
 set(MYKEY_UP SDLK_u) # Up
 set(MYKEY_RIGHT SDLK_r) # Right

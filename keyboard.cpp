@@ -5,10 +5,32 @@
 #include "resourceManager.h"
 #include "def.h"
 
+#define ROWS           3
+#define COLUMNS        13
+#define BORDER_X       2
+#define BORDER_Y       2
+#define SPACE_X        1
+#define SPACE_Y        1
+#define BEZEL_X        1
+#define BEZEL_Y        1
+
+#if SCREEN_WIDTH == 240
+#define KB_X           0
+#define KB_W           240
+#define FIELD_W        228
+#define KEY_W          18
+#else
 #define KB_X           28
-#define KB_Y           128
-#define FIELD_Y        98
+#define KB_W           265
 #define FIELD_W        258
+#define KEY_W          20
+#endif
+
+#define KB_Y           128
+#define KB_H           84
+#define FIELD_Y        98
+#define FIELD_H        19
+#define KEY_H          20
 
 CKeyboard::CKeyboard(const std::string &p_inputText):
     CWindow(),
@@ -30,55 +52,59 @@ CKeyboard::CKeyboard(const std::string &p_inputText):
     {
         SDL_Rect l_rect;
         // Create keyboard image
-        m_imageKeyboard = SDL_utils::createImage(265 * screen.ppu_x, 84 * screen.ppu_y, SDL_MapRGB(screen.surface->format, COLOR_BORDER));
-        l_rect.x = 2 * screen.ppu_x;
-        l_rect.y = 2 * screen.ppu_y;
-        l_rect.w = 261 * screen.ppu_x;
-        l_rect.h = 80 * screen.ppu_y;
+        m_imageKeyboard = SDL_utils::createImage(KB_W * screen.ppu_x, KB_H * screen.ppu_y, SDL_MapRGB(screen.surface->format, COLOR_BORDER));
+        l_rect.x = BORDER_X * screen.ppu_x;
+        l_rect.y = BORDER_Y * screen.ppu_y;
+        l_rect.w = (KB_W - 2 * BORDER_X) * screen.ppu_x;
+        l_rect.h = (KB_H - 2 * BORDER_Y) * screen.ppu_y;
         SDL_FillRect(m_imageKeyboard, &l_rect, SDL_MapRGB(m_imageKeyboard->format, COLOR_BG_2));
         // Keys
-        for (unsigned int l_y = 0; l_y < 3; ++l_y)
+        for (unsigned int l_y = 0; l_y < ROWS; ++l_y)
         {
-            for (unsigned int l_x = 0; l_x < 13; ++l_x)
+            for (unsigned int l_x = 0; l_x < COLUMNS; ++l_x)
             {
-                l_rect.x = (3 + 20 * l_x) * screen.ppu_x;
-                l_rect.y = (3 + 20 * l_y) * screen.ppu_y;
-                l_rect.w = 19 * screen.ppu_x;
-                l_rect.h = 18 * screen.ppu_y;
+                l_rect.x = (BORDER_X + SPACE_X + KEY_W * l_x) * screen.ppu_x;
+                l_rect.y = (BORDER_Y + SPACE_Y + KEY_H * l_y) * screen.ppu_y;
+                l_rect.w = (KEY_W - BEZEL_X) * screen.ppu_x;
+                l_rect.h = (KEY_H - 2 * BEZEL_Y) * screen.ppu_y;
                 SDL_FillRect(m_imageKeyboard, &l_rect, SDL_MapRGB(m_imageKeyboard->format, COLOR_BORDER));
-                l_rect.x += 1 * screen.ppu_x;
-                l_rect.y += 1 * screen.ppu_y;
-                l_rect.w -= 2 * screen.ppu_x;
-                l_rect.h -= 2 * screen.ppu_y;
+                l_rect.x += BEZEL_X * screen.ppu_x;
+                l_rect.y += BEZEL_Y * screen.ppu_y;
+                l_rect.w -= 2 * BEZEL_X * screen.ppu_x;
+                l_rect.h -= 2 * BEZEL_Y * screen.ppu_y;
                 SDL_FillRect(m_imageKeyboard, &l_rect, SDL_MapRGB(m_imageKeyboard->format, COLOR_BG_1));
             }
         }
         // Buttons Cancel and OK
-        l_rect.x = 3 * screen.ppu_x;
-        l_rect.y = 63 * screen.ppu_y;
-        l_rect.w = 129 * screen.ppu_x;
-        l_rect.h = 18 * screen.ppu_y;
+        l_rect.x = (BORDER_X + SPACE_X) * screen.ppu_x;
+        l_rect.y = (KEY_H * ROWS + BORDER_Y + SPACE_Y) * screen.ppu_y;
+        l_rect.w = (KB_W / 2 - 2 * BEZEL_X - SPACE_X) * screen.ppu_x;
+        l_rect.h = (KEY_H - 2 * BEZEL_Y) * screen.ppu_y;
         SDL_FillRect(m_imageKeyboard, &l_rect, SDL_MapRGB(m_imageKeyboard->format, COLOR_BORDER));
-        l_rect.x = 133 * screen.ppu_x;
+        l_rect.x = (KB_W / 2 + SPACE_X) * screen.ppu_x;
         SDL_FillRect(m_imageKeyboard, &l_rect, SDL_MapRGB(m_imageKeyboard->format, COLOR_BORDER));
-        l_rect.w -= 2 * screen.ppu_x;
-        l_rect.h -= 2 * screen.ppu_y;
-        l_rect.y += 1 * screen.ppu_y;
-        l_rect.x = 4 * screen.ppu_x;
+        l_rect.w -= 2 * BEZEL_X * screen.ppu_x;
+        l_rect.h -= 2 * BEZEL_Y * screen.ppu_y;
+        l_rect.y += BEZEL_Y * screen.ppu_y;
+        l_rect.x = 4 * BEZEL_X * screen.ppu_x;
         SDL_FillRect(m_imageKeyboard, &l_rect, SDL_MapRGB(m_imageKeyboard->format, COLOR_BG_1));
-        l_rect.x = 134 * screen.ppu_x;
+        l_rect.x = (KB_W / 2 + SPACE_X + BEZEL_X) * screen.ppu_x;
         SDL_FillRect(m_imageKeyboard, &l_rect, SDL_MapRGB(m_imageKeyboard->format, COLOR_BG_1));
         // Create text field image
-        m_textField = SDL_utils::createImage(265 * screen.ppu_x, 19 * screen.ppu_y, SDL_MapRGB(screen.surface->format, COLOR_BORDER));
-        l_rect.x = 2 * screen.ppu_x;
-        l_rect.y = 2 * screen.ppu_y;
-        l_rect.w = 261 * screen.ppu_x;
-        l_rect.h = 15 * screen.ppu_y;
+        m_textField = SDL_utils::createImage(KB_W * screen.ppu_x, FIELD_H * screen.ppu_y, SDL_MapRGB(screen.surface->format, COLOR_BORDER));
+        l_rect.x = BORDER_X * screen.ppu_x;
+        l_rect.y = BORDER_Y * screen.ppu_y;
+        l_rect.w = (KB_W - 2 * BORDER_X) * screen.ppu_x;
+        l_rect.h = (FIELD_H - 2 * BORDER_Y) * screen.ppu_y;
         SDL_FillRect(m_textField, &l_rect, SDL_MapRGB(m_imageKeyboard->format, COLOR_BG_1));
     }
     // Create footer
     m_footer = SDL_utils::createImage(screen.w * screen.ppu_x, FOOTER_H * screen.ppu_y, SDL_MapRGB(screen.surface->format, COLOR_BORDER));
+#if SCREEN_WIDTH == 240
+    SDL_utils::applyText(screen.w >> 1, 1, m_footer, m_fonts, "A-Inp. B-Canc. START-OK L/R-Chng Y-Back X-Space", Globals::g_colorTextTitle, {COLOR_TITLE_BG}, SDL_utils::T_TEXT_ALIGN_CENTER);
+#else
     SDL_utils::applyText(screen.w >> 1, 1, m_footer, m_fonts, "A-Input   B-Cancel   START-OK   L/R-Change   Y-Backspace   X-Space", Globals::g_colorTextTitle, {COLOR_TITLE_BG}, SDL_utils::T_TEXT_ALIGN_CENTER);
+#endif
 }
 
 CKeyboard::~CKeyboard(void)
@@ -130,17 +156,17 @@ void CKeyboard::render(const bool p_focus) const
     unsigned int selected_letter_y = -1;
     {
         SDL_Rect l_rect;
-        if (m_selected < 39)
+        if (m_selected < ROWS * COLUMNS)
         {
             // A letter is selected
-            if (m_selected >= 26)
+            if (m_selected >= 2 * COLUMNS)
             {
-                selected_letter_x = m_selected - 26;
+                selected_letter_x = m_selected - 2 * COLUMNS;
                 selected_letter_y = 2;
             }
-            else if (m_selected >= 13)
+            else if (m_selected >= COLUMNS)
             {
-                selected_letter_x = m_selected - 13;
+                selected_letter_x = m_selected - COLUMNS;
                 selected_letter_y = 1;
             }
             else
@@ -148,17 +174,17 @@ void CKeyboard::render(const bool p_focus) const
                 selected_letter_x = m_selected;
                 selected_letter_y = 0;
             }
-            l_rect.x = KB_X + 4 + selected_letter_x * 20;
-            l_rect.y = KB_Y + 4 + selected_letter_y * 20;
-            l_rect.w = 17;
-            l_rect.h = 16;
+            l_rect.x = KB_X + 4 + selected_letter_x * KEY_W;
+            l_rect.y = KB_Y + 4 + selected_letter_y * KEY_H;
+            l_rect.w = KEY_W - 3;
+            l_rect.h = KEY_H - 4;
         }
         else
         {
-            l_rect.w = 127;
-            l_rect.h = 16;
-            l_rect.x = KB_X + 4 + (m_selected == 40) * 130;
-            l_rect.y = KB_Y + 64;
+            l_rect.w = (KB_W / 2 - 4 * BEZEL_X - SPACE_X);
+            l_rect.h = KEY_H - 4;
+            l_rect.x = KB_X + 4 + (m_selected == 40) * (KB_W / 2 - 2 * BEZEL_X);
+            l_rect.y = KB_Y + ROWS * KEY_H + 4;
         }
         l_rect.x *= screen.ppu_x;
         l_rect.y *= screen.ppu_y;
@@ -172,9 +198,9 @@ void CKeyboard::render(const bool p_focus) const
         unsigned int l_x(0);
         unsigned int l_y(0);
         std::string l_text("");
-        for (l_y = 0; l_y < 3; ++l_y)
+        for (l_y = 0; l_y < ROWS; ++l_y)
         {
-            for (l_x = 0; l_x < 13; ++l_x)
+            for (l_x = 0; l_x < COLUMNS; ++l_x)
             {
                 if (utf8Code(m_keySets[m_keySet].at(l_i)))
                 {
@@ -186,16 +212,23 @@ void CKeyboard::render(const bool p_focus) const
                     l_text = m_keySets[m_keySet].substr(l_i, 1);
                     l_i += 1;
                 }
-                SDL_utils::applyText(KB_X + 20 * l_x + 13, KB_Y + 7 + 20 * l_y, screen.surface, m_fonts, l_text, Globals::g_colorTextNormal,
+                SDL_utils::applyText(KB_X + KEY_W * l_x + COLUMNS, KB_Y + 7 + KEY_H * l_y, screen.surface, m_fonts, l_text, Globals::g_colorTextNormal,
                     selected_letter_x == l_x && selected_letter_y == l_y ? SDL_Color{COLOR_CURSOR_1} : SDL_Color{COLOR_BG_1}, SDL_utils::T_TEXT_ALIGN_CENTER);
             }
         }
     }
     // Buttons text
+#if SCREEN_WIDTH == 240
+    SDL_utils::applyText(KB_X + 55, KB_Y + 67, screen.surface, m_fonts, "Cancel", Globals::g_colorTextNormal,
+        m_selected == 39 ? SDL_Color{COLOR_CURSOR_1} : SDL_Color{COLOR_BG_1}, SDL_utils::T_TEXT_ALIGN_CENTER);
+    SDL_utils::applyText(KB_X + 173, KB_Y + 67, screen.surface, m_fonts, "OK", Globals::g_colorTextNormal,
+        m_selected == 40 ? SDL_Color{COLOR_CURSOR_1} : SDL_Color{COLOR_BG_1}, SDL_utils::T_TEXT_ALIGN_CENTER);
+#else
     SDL_utils::applyText(KB_X + 67, KB_Y + 67, screen.surface, m_fonts, "Cancel", Globals::g_colorTextNormal,
         m_selected == 39 ? SDL_Color{COLOR_CURSOR_1} : SDL_Color{COLOR_BG_1}, SDL_utils::T_TEXT_ALIGN_CENTER);
     SDL_utils::applyText(KB_X + 197, KB_Y + 67, screen.surface, m_fonts, "OK", Globals::g_colorTextNormal,
         m_selected == 40 ? SDL_Color{COLOR_CURSOR_1} : SDL_Color{COLOR_BG_1}, SDL_utils::T_TEXT_ALIGN_CENTER);
+#endif
     // Draw footer
     SDL_utils::applySurface(0, 227, m_footer, screen.surface);
 }
