@@ -13,6 +13,7 @@
 #include "resourceManager.h"
 #include "screen.h"
 #include "sdlutils.h"
+#include "menu.h"
 
 // Globals
 const SDL_Color Globals::g_colorTextNormal = {COLOR_TEXT_NORMAL};
@@ -116,6 +117,9 @@ int main(int argc, char *argv[])
 #ifndef USE_SDL2
     SDL_EnableUNICODE(1);
 #endif
+
+    // Init menu
+    Menu::init();
 
     // Create instances
     CResourceManager::instance();

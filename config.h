@@ -31,6 +31,7 @@ struct Config {
     std::string res_dir { RES_DIR };
 
     // Keyboard key code mappings
+    SDLC_Keycode key_menu = MYKEY_MENU;
     SDLC_Keycode key_down = MYKEY_DOWN;
     SDLC_Keycode key_left = MYKEY_LEFT;
     SDLC_Keycode key_open = MYKEY_OPEN;

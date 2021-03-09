@@ -16,6 +16,7 @@
 #include "screen.h"
 #include "sdlutils.h"
 #include "text_viewer.h"
+#include "menu.h"
 
 #define SPLITTER_LINE_W static_cast<int>(1 * screen.ppu_x)
 #define X_LEFT static_cast<int>(1 * screen.ppu_x)
@@ -103,6 +104,13 @@ const bool CCommander::keyPress(const SDL_Event &p_event)
     CWindow::keyPress(p_event);
     const auto sym = p_event.key.keysym.sym;
     const auto &c = config();
+    if (sym == c.key_menu) {
+        if (FK_RunMenu(screen.surface) == MENU_RETURN_EXIT) {
+	    // Quit
+            m_retVal = -1;
+	}
+	return true;
+    }
     if (sym == c.key_system) {
         if (openSystemMenu()) m_panelSource->refresh();
         return true;

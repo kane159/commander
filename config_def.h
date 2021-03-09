@@ -46,6 +46,9 @@
 #define FILE_SYSTEM "/dev/sda4"
 #endif
 
+#ifndef MYKEY_MENU
+#define MYKEY_MENU SDLK_MENU
+#endif
 #ifndef MYKEY_UP
 #define MYKEY_UP SDLK_UP
 #endif
