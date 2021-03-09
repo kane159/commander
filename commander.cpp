@@ -15,6 +15,7 @@
 #include "screen.h"
 #include "sdlutils.h"
 #include "viewer.h"
+#include "menu.h"
 
 #define SPLITTER_LINE_W 1
 #define X_LEFT 1
@@ -97,6 +98,11 @@ const bool CCommander::keyPress(const SDL_Event &p_event)
     bool l_ret(false);
     switch (p_event.key.keysym.sym)
     {
+        case MYKEY_MENU:
+	    if (Menu::run() == MENU_RETURN_EXIT) {
+	        m_retVal = -1;
+	    }
+	    break;
         case MYKEY_SYSTEM:
             if (openSystemMenu())
                 m_panelSource->refresh();

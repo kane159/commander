@@ -13,6 +13,7 @@
 #include "resourceManager.h"
 #include "screen.h"
 #include "sdlutils.h"
+#include "menu.h"
 
 // Globals
 const SDL_Color Globals::g_colorTextNormal = {COLOR_TEXT_NORMAL};
@@ -62,6 +63,9 @@ int main(int argc, char** argv)
         std::cerr << "TTF_Init failed: " << SDL_GetError() << std::endl;
         return 1;
     }
+
+    // Init menu
+    Menu::init();
 
     // Create instances
     CResourceManager::instance();
