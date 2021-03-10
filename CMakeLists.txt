@@ -257,3 +257,4 @@ install(
 install(
   FILES "${PROJECT_SOURCE_DIR}/opkg/commander.png"
   DESTINATION share/icons/hicolor/32x32/apps)
+install(TARGETS commander RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
