@@ -34,6 +34,7 @@ typedef enum{
 typedef enum{
     MENU_RETURN_OK,
     MENU_RETURN_EXIT,
+    MENU_RETURN_ERROR,
     NB_MENU_RETURN_CODES,
 } ENUM_MENU_RETURN_CODES;
 
@@ -99,7 +100,7 @@ public:
   static void     init(void);
 #endif
     static void     end(void);
-    static int      run(void);
+    static int      run(SDL_Surface *screen);
     static void     stop(void);
 
 private:
@@ -110,13 +111,13 @@ private:
     static void add_menu_zone(ENUM_MENU_TYPE menu_type);
     static void init_menu_zones(void);
     static void init_menu_system_values(void);
-    static void menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t menu_confirmation, uint8_t menu_action);
+    static void menu_screen_refresh(SDL_Surface *screen, int menuItem, int prevItem, int scroll, uint8_t menu_confirmation, uint8_t menu_action);
 
     static SDL_Surface * draw_screen;
 
     static int backup_key_repeat_delay;
 	static int backup_key_repeat_interval;
-    static SDL_Surface * backup_hw_screen;
+    static SDL_Surface *background_screen;
 
     static TTF_Font *menu_title_font;
     static TTF_Font *menu_info_font;

@@ -1,4 +1,3 @@
-#include "screen.h"
 #include "menu.h"
 #include <iostream>
 #include <SDL/SDL.h>
@@ -58,7 +57,7 @@
 
 
 /// -------------- STATIC VARIABLES --------------
-SDL_Surface * Menu::backup_hw_screen = NULL;
+SDL_Surface * Menu::background_screen = NULL;
 int Menu::backup_key_repeat_delay=0;
 int Menu::backup_key_repeat_interval=0;
 TTF_Font *Menu::menu_title_font = NULL;
@@ -138,14 +137,6 @@ void Menu::init(void)
 		MENU_ERROR_PRINTF("ERROR in init_menu_SDL: Could not open menu font %s, %s\n", MENU_FONT_NAME_SMALL_INFO, SDL_GetError());
 	}
 
-	/// ----- Copy virtual_hw_screen at init ------
-	SDL_Surface * virtual_hw_screen = screen.surface;
-	backup_hw_screen = SDL_CreateRGBSurface(SDL_SWSURFACE,
-			virtual_hw_screen->w, virtual_hw_screen->h, 32, 0, 0, 0, 0);
-	if(backup_hw_screen == NULL){
-		MENU_ERROR_PRINTF("ERROR in init_menu_SDL: Could not create backup_hw_screen: %s\n", SDL_GetError());
-	}
-
 	/// ------ Load arrows imgs -------
 	img_arrow_top = IMG_Load(MENU_PNG_ARROW_TOP_PATH);
 	if(!img_arrow_top) {
@@ -189,10 +180,6 @@ void Menu::end(void)
 			SDL_FreeSurface(menu_zone_surfaces[i]);
 		}
 	}
-	if(backup_hw_screen != NULL){
-		SDL_FreeSurface(backup_hw_screen);
-	}
-
 	SDL_FreeSurface(img_arrow_top);
 	SDL_FreeSurface(img_arrow_bottom);
 
@@ -541,7 +528,7 @@ void Menu::init_menu_system_values(void)
 #endif
 }
 
-void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t menu_confirmation, uint8_t menu_action)
+void Menu::menu_screen_refresh(SDL_Surface *screen, int menuItem, int prevItem, int scroll, uint8_t menu_confirmation, uint8_t menu_action)
 {
 	/// --------- Vars ---------
 #ifdef HAS_MENU_USB
@@ -551,9 +538,8 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 #endif
 
 	/// --------- Clear HW screen ----------
-	SDL_Surface * virtual_hw_screen = screen.surface;
-	if(SDL_BlitSurface(backup_hw_screen, NULL, virtual_hw_screen, NULL)){
-		MENU_ERROR_PRINTF("ERROR Could not Clear virtual_hw_screen: %s\n", SDL_GetError());
+	if(SDL_BlitSurface(background_screen, NULL, screen, NULL)){
+		MENU_ERROR_PRINTF("ERROR Could not Clear screen: %s\n", SDL_GetError());
 	}
 
 	/// --------- Setup Blit Window ----------
@@ -564,23 +550,23 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 	/// --------- Blit prev menu Zone going away ----------
 	menu_blit_window.y = scroll;
 	menu_blit_window.h = SCREEN_VERTICAL_SIZE;
-	if(SDL_BlitSurface(menu_zone_surfaces[prevItem], &menu_blit_window, virtual_hw_screen, NULL)){
-		MENU_ERROR_PRINTF("ERROR Could not Blit surface on virtual_hw_screen: %s\n", SDL_GetError());
+	if(SDL_BlitSurface(menu_zone_surfaces[prevItem], &menu_blit_window, screen, NULL)){
+		MENU_ERROR_PRINTF("ERROR Could not Blit surface on screen: %s\n", SDL_GetError());
 	}
 
 	/// --------- Blit new menu Zone going in (only during animations) ----------
 	if(scroll>0){
 		menu_blit_window.y = SCREEN_VERTICAL_SIZE-scroll;
 		menu_blit_window.h = SCREEN_VERTICAL_SIZE;
-		if(SDL_BlitSurface(menu_zone_surfaces[menuItem], NULL, virtual_hw_screen, &menu_blit_window)){
-			MENU_ERROR_PRINTF("ERROR Could not Blit surface on virtual_hw_screen: %s\n", SDL_GetError());
+		if(SDL_BlitSurface(menu_zone_surfaces[menuItem], NULL, screen, &menu_blit_window)){
+			MENU_ERROR_PRINTF("ERROR Could not Blit surface on screen: %s\n", SDL_GetError());
 		}
 	}
 	else if(scroll<0){
 		menu_blit_window.y = SCREEN_VERTICAL_SIZE+scroll;
 		menu_blit_window.h = SCREEN_VERTICAL_SIZE;
-		if(SDL_BlitSurface(menu_zone_surfaces[menuItem], &menu_blit_window, virtual_hw_screen, NULL)){
-			MENU_ERROR_PRINTF("ERROR Could not Blit surface on virtual_hw_screen: %s\n", SDL_GetError());
+		if(SDL_BlitSurface(menu_zone_surfaces[menuItem], &menu_blit_window, screen, NULL)){
+			MENU_ERROR_PRINTF("ERROR Could not Blit surface on screen: %s\n", SDL_GetError());
 		}
 	}
 	/// --------- No Scroll ? Blitting menu-specific info
@@ -597,13 +583,13 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 		switch(idx_menus[menuItem]){
 #ifdef HAS_MENU_VOLUME
 		case MENU_TYPE_VOLUME:
-			draw_progress_bar(virtual_hw_screen, x_volume_bar, y_volume_bar,
+			draw_progress_bar(screen, x_volume_bar, y_volume_bar,
 					width_progress_bar, height_progress_bar, volume_percentage, 100/STEP_CHANGE_VOLUME);
 			break;
 #endif
 #ifdef HAS_MENU_BRIGHTNESS
 		case MENU_TYPE_BRIGHTNESS:
-			draw_progress_bar(virtual_hw_screen, x_volume_bar, y_volume_bar,
+			draw_progress_bar(screen, x_volume_bar, y_volume_bar,
 					width_progress_bar, height_progress_bar, brightness_percentage, 100/STEP_CHANGE_BRIGHTNESS);
 			break;
 #endif
@@ -612,9 +598,9 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 			/// ---- Write slot -----
 			sprintf(text_tmp, "IN SLOT   < %d >", savestate_slot+1);
 			text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
-			SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
+			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 
 			if(menu_action){
 				sprintf(text_tmp, "Saving...");
@@ -629,9 +615,9 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 					/// ---- Write current Save state ----
 				}
 			}
-			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-			SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			break;
 #endif
 #ifdef HAS_MENU_LOAD
@@ -639,9 +625,9 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 			/// ---- Write slot -----
 			sprintf(text_tmp, "FROM SLOT   < %d >", savestate_slot+1);
 			text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
-			SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
+			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 
 			if(menu_action){
 				sprintf(text_tmp, "Loading...");
@@ -656,18 +642,18 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 					/// ---- Write current Load state ----
 				}
 			}
-			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-			SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			break;
 #endif
 #ifdef HAS_MENU_ASPECT_RATIO
 		case MENU_TYPE_ASPECT_RATIO:
 			sprintf(text_tmp, "<   %s   >", aspect_ratio_name[aspect_ratio]);
 			text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + padding_y_from_center_menu_zone;
-			SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + padding_y_from_center_menu_zone;
+			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			break;
 #endif
 #ifdef HAS_MENU_USB
@@ -675,23 +661,23 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 			/// ---- Write slot -----
 			sprintf(text_tmp, "%s USB", usb_sharing?"EJECT":"MOUNT");
 			text_surface = TTF_RenderText_Blended(menu_title_font, text_tmp, text_color);
-			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
-			SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
+			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 
 			if(menu_action){
 				sprintf(text_tmp, "in progress ...");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			else if(menu_confirmation){
 				sprintf(text_tmp, "Are you sure?");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			else{
 					///Nothing
@@ -711,23 +697,23 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 			sprintf(text_tmp, "< %s%s >", curLayoutName, dots?"...":"" );
 
 			text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
-			SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
+			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 
 			if(menu_action){
 				sprintf(text_tmp, "In progress...");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			else if(menu_confirmation){
 				sprintf(text_tmp, "Are you sure?");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			break;
 #endif
@@ -736,16 +722,16 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 			if(menu_action){
 				sprintf(text_tmp, "In progress...");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			else if(menu_confirmation){
 				sprintf(text_tmp, "Are you sure?");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			break;
 #endif
@@ -759,17 +745,17 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 			if(menu_action){
 				sprintf(text_tmp, "Shutting down...");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			else{
 				if(menu_confirmation){
 					sprintf(text_tmp, "Are you sure?");
 					text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-					text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-					text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-					SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+					text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+					text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+					SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 				}
 			}
 			break;
@@ -778,23 +764,23 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 		case MENU_TYPE_RO_RW:
 			sprintf(text_tmp, "SYS %s", read_write?"READ-ONLY":"READ-WRITE");
 			text_surface = TTF_RenderText_Blended(menu_title_font, text_tmp, text_color);
-			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
-			SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
+			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 
 			if(menu_action){
 				sprintf(text_tmp, "in progress ...");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			else if(menu_confirmation){
 				sprintf(text_tmp, "Are you sure?");
 				text_surface = TTF_RenderText_Blended(menu_info_font, text_tmp, text_color);
-				text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-				text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
-				SDL_BlitSurface(text_surface, NULL, virtual_hw_screen, &text_pos);
+				text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+				text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 + 2*padding_y_from_center_menu_zone;
+				SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
 			}
 			else{
 					///Nothing
@@ -814,24 +800,24 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 	if(print_arrows){
 		/// Top arrow
 		SDL_Rect pos_arrow_top;
-		pos_arrow_top.x = (virtual_hw_screen->w - img_arrow_top->w)/2;
-		pos_arrow_top.y = (virtual_hw_screen->h - MENU_BG_SQUREE_HEIGHT)/4 - img_arrow_top->h/2;
-		SDL_BlitSurface(img_arrow_top, NULL, virtual_hw_screen, &pos_arrow_top);
+		pos_arrow_top.x = (screen->w - img_arrow_top->w)/2;
+		pos_arrow_top.y = (screen->h - MENU_BG_SQUREE_HEIGHT)/4 - img_arrow_top->h/2;
+		SDL_BlitSurface(img_arrow_top, NULL, screen, &pos_arrow_top);
 
 		/// Bottom arrow
 		SDL_Rect pos_arrow_bottom;
-		pos_arrow_bottom.x = (virtual_hw_screen->w - img_arrow_bottom->w)/2;
-		pos_arrow_bottom.y = virtual_hw_screen->h -
-			(virtual_hw_screen->h - MENU_BG_SQUREE_HEIGHT)/4 - img_arrow_bottom->h/2;
-		SDL_BlitSurface(img_arrow_bottom, NULL, virtual_hw_screen, &pos_arrow_bottom);
+		pos_arrow_bottom.x = (screen->w - img_arrow_bottom->w)/2;
+		pos_arrow_bottom.y = screen->h -
+			(screen->h - MENU_BG_SQUREE_HEIGHT)/4 - img_arrow_bottom->h/2;
+		SDL_BlitSurface(img_arrow_bottom, NULL, screen, &pos_arrow_bottom);
 	}
 
 	/// --------- Flip Screen ----------
-	SDL_Flip(virtual_hw_screen);
+	SDL_Flip(screen);
 }
 
 
-int Menu::run(void)
+int Menu::run(SDL_Surface *screen)
 {
 	MENU_DEBUG_PRINTF("Run Menu\n");
 
@@ -865,10 +851,15 @@ int Menu::run(void)
 	savestate_slot = (savestate_slot%MAX_SAVE_SLOTS); // security
 #endif
 
-	/// ------ Copy currently displayed screen -------
-	SDL_Surface * virtual_hw_screen = screen.surface;
-	if(SDL_BlitSurface(virtual_hw_screen, NULL, backup_hw_screen, NULL)){
-		MENU_ERROR_PRINTF("ERROR Could not copy virtual_hw_screen: %s\n", SDL_GetError());
+	/// ------ Backup currently displayed app screen -------
+	background_screen = SDL_CreateRGBSurface(SDL_SWSURFACE,
+			screen->w, screen->h, 32, 0, 0, 0, 0);
+	if(background_screen == NULL){
+		MENU_ERROR_PRINTF("ERROR Could not create background_screen: %s\n", SDL_GetError());
+		return MENU_RETURN_ERROR;
+	}
+	if(SDL_BlitSurface(screen, NULL, background_screen, NULL)){
+		MENU_ERROR_PRINTF("ERROR Could not copy screen: %s\n", SDL_GetError());
 	}
 
 	/// -------- Main loop ---------
@@ -1121,7 +1112,7 @@ int Menu::run(void)
 							if(menu_confirmation){
 								MENU_DEBUG_PRINTF("Saving in slot %d\n", savestate_slot);
 								/// ------ Refresh Screen -------
-								menu_screen_refresh(menuItem, prevItem, scroll, menu_confirmation, 1);
+								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ------ Save game ------
 								stop_menu_loop = 1;
@@ -1139,7 +1130,7 @@ int Menu::run(void)
 							if(menu_confirmation){
 								MENU_DEBUG_PRINTF("Loading in slot %d\n", savestate_slot);
 								/// ------ Refresh Screen -------
-								menu_screen_refresh(menuItem, prevItem, scroll, menu_confirmation, 1);
+								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ------ Load game ------
 								stop_menu_loop = 1;
@@ -1158,7 +1149,7 @@ int Menu::run(void)
 							if(menu_confirmation){
 								MENU_DEBUG_PRINTF("%s USB - confirmed\n", usb_sharing?"Unmount":"Mount");
 								/// ----- Refresh screen ----
-								menu_screen_refresh(menuItem, prevItem, scroll, menu_confirmation, 1);
+								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ----- Shell cmd ----
 								/*fp = popen(usb_sharing?SHELL_CMD_USB_UNMOUNT:SHELL_CMD_USB_MOUNT, "r");
@@ -1194,7 +1185,7 @@ int Menu::run(void)
 								MENU_DEBUG_PRINTF("Theme change - confirmed\n");
 
 								/// ------ Refresh Screen -------
-								menu_screen_refresh(menuItem, prevItem, scroll, menu_confirmation, 1);
+								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ----- Write new theme and restart RetroFe ----
 								config->exportCurrentLayout(Utils::combinePath(Configuration::absolutePath, "layout.conf"),
@@ -1216,7 +1207,7 @@ int Menu::run(void)
 								MENU_DEBUG_PRINTF("Lancher change - confirmed\n");
 
 								/// ------ Refresh Screen -------
-								menu_screen_refresh(menuItem, prevItem, scroll, menu_confirmation, 1);
+								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ----- Shell cmd ----
 								MENU_DEBUG_PRINTF("Running command: %s\n", SHELL_CMD_SET_LAUNCHER_GMENU2X);
@@ -1258,7 +1249,7 @@ int Menu::run(void)
 								MENU_DEBUG_PRINTF("Powerdown - confirmed\n");
 
 								/// ------ Refresh Screen -------
-								menu_screen_refresh(menuItem, prevItem, scroll, menu_confirmation, 1);
+								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ----- Shell cmd ----
 								sprintf(shell_cmd, "%s", SHELL_CMD_POWERDOWN);
@@ -1283,7 +1274,7 @@ int Menu::run(void)
 							if(menu_confirmation){
 								MENU_DEBUG_PRINTF("SYSTEM %s - confirmed\n", read_write?"RO":"RW");
 								/// ----- Refresh screen ----
-								menu_screen_refresh(menuItem, prevItem, scroll, menu_confirmation, 1);
+								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ----- Shell cmd ----
 								fp = popen(read_write?SHELL_CMD_RO:SHELL_CMD_RW, "r");
@@ -1343,7 +1334,7 @@ int Menu::run(void)
 
 		/// --------- Refresh screen
 		if(screen_refresh){
-			menu_screen_refresh(menuItem, prevItem, scroll, menu_confirmation, 0);
+		  menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 0);
 		}
 
 		/// --------- reset screen refresh ---------
@@ -1356,11 +1347,17 @@ int Menu::run(void)
 	}
 
 	/// --------- Clear HW screen ----------
-	if(SDL_BlitSurface(backup_hw_screen, NULL, virtual_hw_screen, NULL)){
-		MENU_ERROR_PRINTF("ERROR Could not Clear virtual_hw_screen: %s\n", SDL_GetError());
+	if(SDL_BlitSurface(background_screen, NULL, screen, NULL)){
+		MENU_ERROR_PRINTF("ERROR Could not Clear screen: %s\n", SDL_GetError());
 	}
 
 	/// --------- Flip Screen ----------
-	SDL_Flip(virtual_hw_screen);
+	SDL_Flip(screen);
+
+	if(background_screen != NULL){
+		SDL_FreeSurface(background_screen);
+		background_screen = NULL;
+	}
+	MENU_DEBUG_PRINTF("Leave Menu\n");
 	return returnCode;
 }
