@@ -173,8 +173,8 @@ static void draw_progress_bar(SDL_Surface * surface, uint16_t x, uint16_t y, uin
 	{
 		/// ---- draw one bar ----
 		//MENU_DEBUG_PRINTF("Drawing filled bar %d\n", i);
-	  SDL_Rect rect = {(Sint16)(x+ i*(bar_width +bar_padding_x)),
-			   (Sint16)y, bar_width, height};
+		SDL_Rect rect = {x+ i*(bar_width +bar_padding_x),
+				y, bar_width, height};
 		SDL_FillRect(surface, &rect, SDL_MapRGB(surface->format, GRAY_MAIN_R, GRAY_MAIN_G, GRAY_MAIN_B));
 	}
 
@@ -183,12 +183,12 @@ static void draw_progress_bar(SDL_Surface * surface, uint16_t x, uint16_t y, uin
 	{
 		/// ---- draw one bar ----
 		//MENU_DEBUG_PRINTF("Drawing empty bar %d\n", i);
-	  SDL_Rect rect = {(Sint16)(x+ i*(bar_width +bar_padding_x) + nb_full_bars*(bar_width +bar_padding_x)),
-			   (Sint16)y, bar_width, height};
+		SDL_Rect rect = {x+ i*(bar_width +bar_padding_x) + nb_full_bars*(bar_width +bar_padding_x),
+				y, bar_width, height};
 		SDL_FillRect(surface, &rect, SDL_MapRGB(surface->format, GRAY_MAIN_R, GRAY_MAIN_G, GRAY_MAIN_B));
 
-		SDL_Rect rect2 = {(Sint16)(x+ i*(bar_width +bar_padding_x) + line_width + nb_full_bars*(bar_width +bar_padding_x)),
-				  (Sint16)(y + line_width, bar_width - line_width*2), (Uint16)(height - line_width*2)};
+		SDL_Rect rect2 = {x+ i*(bar_width +bar_padding_x) + line_width + nb_full_bars*(bar_width +bar_padding_x),
+				y + line_width, bar_width - line_width*2, height - line_width*2};
 		SDL_FillRect(surface, &rect2, SDL_MapRGB(surface->format, WHITE_MAIN_R, WHITE_MAIN_R, WHITE_MAIN_R));
 	}
 
