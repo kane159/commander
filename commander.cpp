@@ -99,7 +99,7 @@ const bool CCommander::keyPress(const SDL_Event &p_event)
     switch (p_event.key.keysym.sym)
     {
         case MYKEY_MENU:
-	    if (Menu::run() == MENU_RETURN_EXIT) {
+	    if (Menu::run(screen.surface) == MENU_RETURN_EXIT) {
 	        m_retVal = -1;
 	    }
 	    break;
