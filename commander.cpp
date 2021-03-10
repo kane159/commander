@@ -15,7 +15,7 @@
 #include "screen.h"
 #include "sdlutils.h"
 #include "viewer.h"
-#include "menu.h"
+#include "fk_menu.h"
 
 #define SPLITTER_LINE_W 1
 #define X_LEFT 1
@@ -99,7 +99,7 @@ const bool CCommander::keyPress(const SDL_Event &p_event)
     switch (p_event.key.keysym.sym)
     {
         case MYKEY_MENU:
-	    if (Menu::run(screen.surface) == MENU_RETURN_EXIT) {
+	    if (FK_RunMenu(screen.surface) == MENU_RETURN_EXIT) {
 	        m_retVal = -1;
 	    }
 	    break;

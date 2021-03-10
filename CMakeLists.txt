@@ -27,9 +27,9 @@ set(DinguxCommander_SRCS
   dialog.cpp
   fileLister.cpp
   fileutils.cpp
+  fk_menu.c
   keyboard.cpp
   main.cpp
-  menu.cpp
   panel.cpp
   resourceManager.cpp
   screen.cpp

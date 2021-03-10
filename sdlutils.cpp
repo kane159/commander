@@ -10,7 +10,7 @@
 #include "resourceManager.h"
 #include "screen.h"
 #include "sdl_ttf_multifont.h"
-#include "menu.h"
+#include "fk_menu.h"
 
 bool SDL_utils::isSupportedImageExt(const std::string &ext) {
     return ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "ico" || ext == "bmp" || ext == "xcf";
@@ -142,7 +142,7 @@ void SDL_utils::hastalavista(void)
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
-    Menu::end();
+    FK_EndMenu();
 }
 
 void SDL_utils::pleaseWait(void)
