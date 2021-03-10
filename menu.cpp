@@ -365,7 +365,7 @@ void Menu::add_menu_zone(ENUM_MENU_TYPE menu_type)
 	case MENU_TYPE_EXIT:
 		MENU_DEBUG_PRINTF("Init MENU_TYPE_EXIT\n");
 		/// ------ Text ------
-		text_surface = TTF_RenderText_Blended(menu_title_font, "EXIT", text_color);
+		text_surface = TTF_RenderText_Blended(menu_title_font, "EXIT APP", text_color);
 		text_pos.x = (surface->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
 		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
 		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
@@ -411,16 +411,6 @@ void Menu::add_menu_zone(ENUM_MENU_TYPE menu_type)
 		MENU_DEBUG_PRINTF("Init MENU_TYPE_POWERDOWN\n");
 		/// ------ Text ------
 		text_surface = TTF_RenderText_Blended(menu_title_font, "POWERDOWN", text_color);
-		text_pos.x = (surface->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
-		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
-		break;
-#endif
-#ifdef HAS_MENU_RO_RW
-	case MENU_TYPE_RO_RW:
-		MENU_DEBUG_PRINTF("Init MENU_TYPE_RO_RW\n");
-		/// ------ Text ------
-		text_surface = TTF_RenderText_Blended(menu_title_font, "SYSTEM RO", text_color);
 		text_pos.x = (surface->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
 		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
 		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
@@ -786,7 +776,7 @@ void Menu::menu_screen_refresh(int menuItem, int prevItem, int scroll, uint8_t m
 #endif
 #ifdef HAS_MENU_RO_RW
 		case MENU_TYPE_RO_RW:
-			sprintf(text_tmp, "SYSTEM %s", read_write?"RO":"RW");
+			sprintf(text_tmp, "SYS %s", read_write?"READ-ONLY":"READ-WRITE");
 			text_surface = TTF_RenderText_Blended(menu_title_font, text_tmp, text_color);
 			text_pos.x = (virtual_hw_screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
 			text_pos.y = virtual_hw_screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
@@ -1364,5 +1354,13 @@ int Menu::run(void)
 	if(SDL_EnableKeyRepeat(backup_key_repeat_delay, backup_key_repeat_interval)){
 		MENU_ERROR_PRINTF("ERROR with SDL_EnableKeyRepeat: %s\n", SDL_GetError());
 	}
+
+	/// --------- Clear HW screen ----------
+	if(SDL_BlitSurface(backup_hw_screen, NULL, virtual_hw_screen, NULL)){
+		MENU_ERROR_PRINTF("ERROR Could not Clear virtual_hw_screen: %s\n", SDL_GetError());
+	}
+
+	/// --------- Flip Screen ----------
+	SDL_Flip(virtual_hw_screen);
 	return returnCode;
 }
