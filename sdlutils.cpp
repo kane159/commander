@@ -15,7 +15,7 @@
 #include "screen.h"
 #include "sdl_ttf_multifont.h"
 #include "sdl_ptrs.h"
-#include "menu.h"
+#include "fk_menu.h"
 
 namespace SDL_utils {
 
@@ -232,7 +232,7 @@ void hastalavista(void)
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
-    Menu::end();
+    FK_EndMenu();
 }
 
 void pleaseWait(void)

@@ -1,4 +1,40 @@
-#pragma once
+/*
+    FK - FunKey retro gaming console library
+    Copyright (C) 2020-2021 Vincent Buso
+    Copyright (C) 2020-2021 Michel Stempin
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Vincent Buso
+    vincent.buso@funkey-project.com
+    Michel Stempin
+    michel.stempin@funkey-project.com
+*/
+
+/**
+ *  @file FK_menu.h
+ *  This is the menu API for the FunKey retro gaming console library
+ */
+
+#ifndef _FK_menu_h
+#define _FK_menu_h
+
+/* Set up for C function definitions, even when using C++ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
@@ -90,73 +126,18 @@ typedef enum {ASPECT_RATIOS} ENUM_ASPECT_RATIOS_TYPES;
 #define SHELL_CMD_RW                        "rw"
 #endif
 
-class Menu
-{
-
-public:
 #ifdef HAS_MENU_THEME
-    static void     init(Configuration &c);
+extern void FK_InitMenu(Configuration &c);
 #else
-  static void     init(void);
+extern void FK_InitMenu(void);
 #endif
-    static void     end(void);
-    static int      run(SDL_Surface *screen);
-    static void     stop(void);
+extern void FK_EndMenu(void);
+extern int FK_RunMenu(SDL_Surface *screen);
+extern void FK_StopMenu(void);
 
-private:
-#if defined(HAS_MENU_VOLUME) || defined(HAS_MENU_BRIGHTNESS)
-    static void draw_progress_bar(SDL_Surface * surface, uint16_t x, uint16_t y, uint16_t width,
-            uint16_t height, uint8_t percentage, uint16_t nb_bars);
-#endif
-    static void add_menu_zone(ENUM_MENU_TYPE menu_type);
-    static void init_menu_zones(void);
-    static void init_menu_system_values(void);
-    static void menu_screen_refresh(SDL_Surface *screen, int menuItem, int prevItem, int scroll, uint8_t menu_confirmation, uint8_t menu_action);
-
-    static SDL_Surface * draw_screen;
-
-    static int backup_key_repeat_delay;
-	static int backup_key_repeat_interval;
-    static SDL_Surface *background_screen;
-
-    static TTF_Font *menu_title_font;
-    static TTF_Font *menu_info_font;
-    static TTF_Font *menu_small_info_font;
-    static SDL_Surface ** menu_zone_surfaces;
-    static int * idx_menus;
-    static int nb_menu_zones;
-    static int menuItem;
-
-    static int stop_menu_loop;
-
-    static SDL_Color text_color;
-    static int padding_y_from_center_menu_zone;
-    static uint16_t width_progress_bar;
-    static uint16_t height_progress_bar;
-#ifdef HAS_MENU_VOLUME
-    static uint16_t x_volume_bar;
-    static uint16_t y_volume_bar;
-    static int volume_percentage;
-#endif
-#ifdef HAS_MENU_BRIGHTNESS
-    static uint16_t x_brightness_bar;
-    static uint16_t y_brightness_bar;
-    static int brightness_percentage;
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+}
 #endif
 
-#ifdef HAS_MENU_ASPECT_RATIO
-    static const char *aspect_ratio_name[];
-    static int aspect_ratio;
-    static int aspect_ratio_factor_percent;
-    static int aspect_ratio_factor_step;
-#endif
-
-#if defined(HAS_MENU_SAVE) || defined (HAS_MENU_LOAD)
-    static int savestate_slot;
-#endif
-
-#ifdef HAS_MENU_THEME
-    static Configuration *config;
-    static int indexChooseLayout;
-#endif
-};
+#endif /* _FK_menu_h */

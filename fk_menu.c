@@ -1,6 +1,34 @@
-#include "menu.h"
-#include <iostream>
-#include <SDL/SDL.h>
+/*
+    FK - FunKey retro gaming console library
+    Copyright (C) 2020-2021 Vincent Buso
+    Copyright (C) 2020-2021 Michel Stempin
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Vincent Buso
+    vincent.buso@funkey-project.com
+    Michel Stempin
+    michel.stempin@funkey-project.com
+*/
+
+/**
+ *  @file FK_menu.c
+ *  This is the menu API for the FunKey retro gaming console library
+ */
+
+#include "fk_menu.h"
 
 /// -------------- DEFINES --------------
 
@@ -57,158 +85,68 @@
 
 
 /// -------------- STATIC VARIABLES --------------
-SDL_Surface * Menu::background_screen = NULL;
-int Menu::backup_key_repeat_delay=0;
-int Menu::backup_key_repeat_interval=0;
-TTF_Font *Menu::menu_title_font = NULL;
-TTF_Font *Menu::menu_info_font = NULL;
-TTF_Font *Menu::menu_small_info_font = NULL;
-SDL_Surface *img_arrow_top = NULL;
-SDL_Surface *img_arrow_bottom = NULL;
-SDL_Surface ** Menu::menu_zone_surfaces = NULL;
-int *Menu::idx_menus = NULL;
-int Menu::nb_menu_zones = 0;
-int Menu::menuItem=0;
-int Menu::stop_menu_loop = 0;
+static SDL_Surface * background_screen = NULL;
+static int backup_key_repeat_delay=0;
+static int backup_key_repeat_interval=0;
+static TTF_Font *menu_title_font = NULL;
+static TTF_Font *menu_info_font = NULL;
+static TTF_Font *menu_small_info_font = NULL;
+static SDL_Surface *img_arrow_top = NULL;
+static SDL_Surface *img_arrow_bottom = NULL;
+static SDL_Surface ** menu_zone_surfaces = NULL;
+static int *idx_menus = NULL;
+static int nb_menu_zones = 0;
+static int menuItem=0;
+static int stop_menu_loop = 0;
 
-SDL_Color Menu::text_color = {GRAY_MAIN_R, GRAY_MAIN_G, GRAY_MAIN_B};
-int Menu::padding_y_from_center_menu_zone = 18;
-uint16_t Menu::width_progress_bar = 100;
-uint16_t Menu::height_progress_bar = 20;
+static SDL_Color text_color = {GRAY_MAIN_R, GRAY_MAIN_G, GRAY_MAIN_B};
+static int padding_y_from_center_menu_zone = 18;
+static uint16_t width_progress_bar = 100;
+static uint16_t height_progress_bar = 20;
 
 #ifdef HAS_MENU_VOLUME
-uint16_t Menu::x_volume_bar = 0;
-uint16_t Menu::y_volume_bar = 0;
-int Menu::volume_percentage = 0;
+static uint16_t x_volume_bar = 0;
+static uint16_t y_volume_bar = 0;
+static int volume_percentage = 0;
 #endif
 #ifdef HAS_MENU_BRIGHTNESS
-uint16_t Menu::x_brightness_bar = 0;
-uint16_t Menu::y_brightness_bar = 0;
-int Menu::brightness_percentage = 0;
+static uint16_t x_brightness_bar = 0;
+static uint16_t y_brightness_bar = 0;
+static int brightness_percentage = 0;
 #endif
 
 #ifdef HAS_MENU_ASPECT_RATIO
 #undef X
 #define X(a, b) b,
-const char *Menu::aspect_ratio_name[] = {ASPECT_RATIOS};
-int Menu::aspect_ratio = ASPECT_RATIOS_TYPE_STRECHED;
-int Menu::aspect_ratio_factor_percent = 50;
-int Menu::aspect_ratio_factor_step = 10;
+static const char *aspect_ratio_name[] = {ASPECT_RATIOS};
+static int aspect_ratio = ASPECT_RATIOS_TYPE_STRECHED;
+static int aspect_ratio_factor_percent = 50;
+static int aspect_ratio_factor_step = 10;
 #endif
 
 #ifdef HAS_MENU_THEME
-Configuration *Menu::config = NULL;
-int Menu::indexChooseLayout = 0;
+static Configuration *config = NULL;
+static int indexChooseLayout = 0;
 #endif
 
 #if defined(HAS_MENU_SAVE) || defined (HAS_MENU_LOAD)
-int Menu::savestate_slot = 0;
+static int savestate_slot = 0;
 #endif
 
 #ifdef HAS_MENU_USB
 /// USB stuff
-int usb_data_connected = 0;
-int usb_sharing = 0;
+static int usb_data_connected = 0;
+static int usb_sharing = 0;
 #endif
 
 #ifdef HAS_MENU_RO_RW
-int read_write = 0;
+static int read_write = 0;
 #endif
 
 /// -------------- FUNCTIONS IMPLEMENTATION --------------
-#ifdef HAS_MENU_THEME
-void Menu::init(Configuration &c)
- #else
-void Menu::init(void)
-#endif
-{
-	MENU_DEBUG_PRINTF("Init Menu\n");
-	/// ----- Loading the fonts -----
-	menu_title_font = TTF_OpenFont(MENU_FONT_NAME_TITLE, MENU_FONT_SIZE_TITLE);
-	if(!menu_title_font){
-		MENU_ERROR_PRINTF("ERROR in init_menu_SDL: Could not open menu font %s, %s\n", MENU_FONT_NAME_TITLE, SDL_GetError());
-	}
-	menu_info_font = TTF_OpenFont(MENU_FONT_NAME_INFO, MENU_FONT_SIZE_INFO);
-	if(!menu_info_font){
-		MENU_ERROR_PRINTF("ERROR in init_menu_SDL: Could not open menu font %s, %s\n", MENU_FONT_NAME_INFO, SDL_GetError());
-	}
-	menu_small_info_font = TTF_OpenFont(MENU_FONT_NAME_SMALL_INFO, MENU_FONT_SIZE_SMALL_INFO);
-	if(!menu_small_info_font){
-		MENU_ERROR_PRINTF("ERROR in init_menu_SDL: Could not open menu font %s, %s\n", MENU_FONT_NAME_SMALL_INFO, SDL_GetError());
-	}
-
-	/// ------ Load arrows imgs -------
-	img_arrow_top = IMG_Load(MENU_PNG_ARROW_TOP_PATH);
-	if(!img_arrow_top) {
-		MENU_ERROR_PRINTF("ERROR IMG_Load: %s\n", IMG_GetError());
-	}
-	img_arrow_bottom = IMG_Load(MENU_PNG_ARROW_BOTTOM_PATH);
-	if(!img_arrow_bottom) {
-		MENU_ERROR_PRINTF("ERROR IMG_Load: %s\n", IMG_GetError());
-	}
-
-#ifdef HAS_MENU_THEME
-	/// ------ Save config pointer ------
-	config = &c;
-#endif
-#ifdef HAS_MENU_RO_RW
-	/// ----- Shell cmd ----
-	FILE *fp = popen(SHELL_CMD_RO, "r");
-	if (fp == NULL) {
-	  MENU_ERROR_PRINTF("Failed to run command %s\n", SHELL_CMD_RO);
-	}
-#endif
-
-	/// ------ Init menu zones ------
-	init_menu_zones();
-
-	return;
-}
-
-
-void Menu::end(void)
-{
-	MENU_DEBUG_PRINTF("End Menu \n");
-	/// ------ Close font -------
-	TTF_CloseFont(menu_title_font);
-	TTF_CloseFont(menu_info_font);
-	TTF_CloseFont(menu_small_info_font);
-
-	/// ------ Free Surfaces -------
-	for(int i=0; i < nb_menu_zones; i++){
-		if(menu_zone_surfaces[i] != NULL){
-			SDL_FreeSurface(menu_zone_surfaces[i]);
-		}
-	}
-	SDL_FreeSurface(img_arrow_top);
-	SDL_FreeSurface(img_arrow_bottom);
-
-	/// ------ Free Menu memory and reset vars -----
-	if(idx_menus){
-		free(idx_menus);
-	}
-	idx_menus=NULL;
-	nb_menu_zones = 0;
-
-#ifdef HAS_MENU_RO_RW
-	/// ----- Shell cmd ----
-	FILE *fp = popen(SHELL_CMD_RO, "r");
-	if (fp == NULL) {
-	  MENU_ERROR_PRINTF("Failed to run command %s\n", SHELL_CMD_RO);
-	}
-#endif
-
-	return;
-}
-
-void Menu::stop(void)
-{
-	stop_menu_loop = 1;
-}
-
 
 #if defined(HAS_MENU_VOLUME) || defined(HAS_MENU_BRIGHTNESS)
-void Menu::draw_progress_bar(SDL_Surface * surface, uint16_t x, uint16_t y, uint16_t width,
+static void draw_progress_bar(SDL_Surface * surface, uint16_t x, uint16_t y, uint16_t width,
 		uint16_t height, uint8_t percentage, uint16_t nb_bars)
 {
 	/// ------ Init Variables ------
@@ -258,7 +196,7 @@ void Menu::draw_progress_bar(SDL_Surface * surface, uint16_t x, uint16_t y, uint
 }
 #endif
 
-void Menu::add_menu_zone(ENUM_MENU_TYPE menu_type)
+static void add_menu_zone(ENUM_MENU_TYPE menu_type)
 {
 	/// ------ Increase nb of menu zones -------
 	nb_menu_zones++;
@@ -412,7 +350,7 @@ void Menu::add_menu_zone(ENUM_MENU_TYPE menu_type)
 	SDL_FreeSurface(text_surface);
 }
 
-void Menu::init_menu_zones(void)
+static void init_menu_zones(void)
 {
 #ifdef HAS_MENU_VOLUME
 	add_menu_zone(MENU_TYPE_VOLUME);
@@ -450,7 +388,98 @@ void Menu::init_menu_zones(void)
 }
 
 
-void Menu::init_menu_system_values(void)
+#ifdef HAS_MENU_THEME
+void FK_InitMenu(Configuration &c)
+ #else
+void FK_InitMenu(void)
+#endif
+{
+	MENU_DEBUG_PRINTF("Init Menu\n");
+	/// ----- Loading the fonts -----
+	menu_title_font = TTF_OpenFont(MENU_FONT_NAME_TITLE, MENU_FONT_SIZE_TITLE);
+	if(!menu_title_font){
+		MENU_ERROR_PRINTF("ERROR in init_menu_SDL: Could not open menu font %s, %s\n", MENU_FONT_NAME_TITLE, SDL_GetError());
+	}
+	menu_info_font = TTF_OpenFont(MENU_FONT_NAME_INFO, MENU_FONT_SIZE_INFO);
+	if(!menu_info_font){
+		MENU_ERROR_PRINTF("ERROR in init_menu_SDL: Could not open menu font %s, %s\n", MENU_FONT_NAME_INFO, SDL_GetError());
+	}
+	menu_small_info_font = TTF_OpenFont(MENU_FONT_NAME_SMALL_INFO, MENU_FONT_SIZE_SMALL_INFO);
+	if(!menu_small_info_font){
+		MENU_ERROR_PRINTF("ERROR in init_menu_SDL: Could not open menu font %s, %s\n", MENU_FONT_NAME_SMALL_INFO, SDL_GetError());
+	}
+
+	/// ------ Load arrows imgs -------
+	img_arrow_top = IMG_Load(MENU_PNG_ARROW_TOP_PATH);
+	if(!img_arrow_top) {
+		MENU_ERROR_PRINTF("ERROR IMG_Load: %s\n", IMG_GetError());
+	}
+	img_arrow_bottom = IMG_Load(MENU_PNG_ARROW_BOTTOM_PATH);
+	if(!img_arrow_bottom) {
+		MENU_ERROR_PRINTF("ERROR IMG_Load: %s\n", IMG_GetError());
+	}
+
+#ifdef HAS_MENU_THEME
+	/// ------ Save config pointer ------
+	config = &c;
+#endif
+#ifdef HAS_MENU_RO_RW
+	/// ----- Shell cmd ----
+	FILE *fp = popen(SHELL_CMD_RO, "r");
+	if (fp == NULL) {
+	  MENU_ERROR_PRINTF("Failed to run command %s\n", SHELL_CMD_RO);
+	}
+#endif
+
+	/// ------ Init menu zones ------
+	init_menu_zones();
+
+	return;
+}
+
+
+void FK_EndMenu(void)
+{
+	MENU_DEBUG_PRINTF("End Menu \n");
+	/// ------ Close font -------
+	TTF_CloseFont(menu_title_font);
+	TTF_CloseFont(menu_info_font);
+	TTF_CloseFont(menu_small_info_font);
+
+	/// ------ Free Surfaces -------
+	for(int i=0; i < nb_menu_zones; i++){
+		if(menu_zone_surfaces[i] != NULL){
+			SDL_FreeSurface(menu_zone_surfaces[i]);
+		}
+	}
+	SDL_FreeSurface(img_arrow_top);
+	SDL_FreeSurface(img_arrow_bottom);
+
+	/// ------ Free Menu memory and reset vars -----
+	if(idx_menus){
+		free(idx_menus);
+	}
+	idx_menus=NULL;
+	nb_menu_zones = 0;
+
+#ifdef HAS_MENU_RO_RW
+	/// ----- Shell cmd ----
+	FILE *fp = popen(SHELL_CMD_RO, "r");
+	if (fp == NULL) {
+	  MENU_ERROR_PRINTF("Failed to run command %s\n", SHELL_CMD_RO);
+	}
+#endif
+
+	return;
+}
+
+void FK_StopMenu(void)
+{
+	stop_menu_loop = 1;
+}
+
+
+static void init_menu_system_values(void)
 {
 #if defined(HAS_MENU_VOLUME) || defined(HAS_MENU_BRIGHTNESS) || defined(HAS_MENU_USB) || defined(HAS_MENU_RO_RW)
 	FILE *fp;
@@ -528,7 +557,7 @@ void Menu::init_menu_system_values(void)
 #endif
 }
 
-void Menu::menu_screen_refresh(SDL_Surface *screen, int menuItem, int prevItem, int scroll, uint8_t menu_confirmation, uint8_t menu_action)
+static void menu_screen_refresh(SDL_Surface *screen, int menuItem, int prevItem, int scroll, uint8_t menu_confirmation, uint8_t menu_action)
 {
 	/// --------- Vars ---------
 #ifdef HAS_MENU_USB
@@ -817,7 +846,7 @@ void Menu::menu_screen_refresh(SDL_Surface *screen, int menuItem, int prevItem, 
 }
 
 
-int Menu::run(SDL_Surface *screen)
+int FK_RunMenu(SDL_Surface *screen)
 {
 	MENU_DEBUG_PRINTF("Run Menu\n");
 

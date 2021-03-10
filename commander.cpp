@@ -16,7 +16,7 @@
 #include "screen.h"
 #include "sdlutils.h"
 #include "text_viewer.h"
-#include "menu.h"
+#include "fk_menu.h"
 
 #define SPLITTER_LINE_W static_cast<int>(1 * screen.ppu_x)
 #define X_LEFT static_cast<int>(1 * screen.ppu_x)
