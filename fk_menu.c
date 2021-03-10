@@ -35,7 +35,7 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-#define MENU_DEBUG
+//#define MENU_DEBUG
 #define MENU_ERROR
 
 #ifdef MENU_DEBUG
@@ -331,7 +331,7 @@ static void add_menu_zone(ENUM_MENU_TYPE menu_type)
 		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
 		break;
 #endif
-#ifdef HAS_MENU_POWERDOWN		
+#ifdef HAS_MENU_POWERDOWN
 	case MENU_TYPE_POWERDOWN:
 		MENU_DEBUG_PRINTF("Init MENU_TYPE_POWERDOWN\n");
 		/// ------ Text ------
@@ -340,6 +340,10 @@ static void add_menu_zone(ENUM_MENU_TYPE menu_type)
 		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
 		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
 		break;
+#endif
+#ifdef HAS_MENU_POWERDOWN
+	case MENU_TYPE_RO_RW:
+	    break;
 #endif
 	default:
 		MENU_DEBUG_PRINTF("Warning - In add_menu_zone, unknown MENU_TYPE: %d\n", menu_type);
