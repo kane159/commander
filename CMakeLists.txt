@@ -180,3 +180,5 @@ if(UBSAN)
 target_compile_options(${BIN_TARGET} PUBLIC -fsanitize=undefined)
 target_link_libraries(${BIN_TARGET} PUBLIC -fsanitize=undefined)
 endif()
+
+install(TARGETS commander RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
