@@ -341,8 +341,14 @@ static void add_menu_zone(ENUM_MENU_TYPE menu_type)
 		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
 		break;
 #endif
-#ifdef HAS_MENU_POWERDOWN
+#ifdef HAS_MENU_RO_RW
 	case MENU_TYPE_RO_RW:
+		MENU_DEBUG_PRINTF("Init MENU_TYPE_RO_RW\n");
+		/// ------ Text ------
+		text_surface = TTF_RenderText_Blended(menu_title_font, "SET SYSTEM:", text_color);
+		text_pos.x = (surface->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 - padding_y_from_center_menu_zone*2;
+		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
 	    break;
 #endif
 	default:
@@ -371,6 +377,9 @@ static void init_menu_zones(void)
 #ifdef HAS_MENU_ASPECT_RATIO
 	add_menu_zone(MENU_TYPE_ASPECT_RATIO);
 #endif
+#ifdef HAS_MENU_RO_RW
+	add_menu_zone(MENU_TYPE_RO_RW);
+#endif
 #ifdef HAS_MENU_EXIT
 	add_menu_zone(MENU_TYPE_EXIT);
 #endif
@@ -385,9 +394,6 @@ static void init_menu_zones(void)
 #endif
 #ifdef HAS_MENU_POWERDOWN
 	add_menu_zone(MENU_TYPE_POWERDOWN);
-#endif
-#ifdef HAS_MENU_RO_RW
-	add_menu_zone(MENU_TYPE_RO_RW);
 #endif
 }
 
@@ -795,7 +801,7 @@ static void menu_screen_refresh(SDL_Surface *screen, int menuItem, int prevItem,
 #endif
 #ifdef HAS_MENU_RO_RW
 		case MENU_TYPE_RO_RW:
-			sprintf(text_tmp, "SYS %s", read_write?"READ-ONLY":"READ-WRITE");
+			sprintf(text_tmp, "%s", read_write?"READ-ONLY":"READ-WRITE");
 			text_surface = TTF_RenderText_Blended(menu_title_font, text_tmp, text_color);
 			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
 			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
@@ -1303,7 +1309,7 @@ int FK_RunMenu(SDL_Surface *screen)
 #endif
 #ifdef HAS_MENU_RO_RW
 						    if(idx_menus[menuItem] == MENU_TYPE_RO_RW){
-							MENU_DEBUG_PRINTF("SYSTEM %s\n", read_write?"RO":"RW");
+							MENU_DEBUG_PRINTF("%s\n", read_write?"RO":"RW");
 							if(menu_confirmation){
 								MENU_DEBUG_PRINTF("SYSTEM %s - confirmed\n", read_write?"RO":"RW");
 								/// ----- Refresh screen ----

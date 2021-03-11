@@ -14,6 +14,7 @@
 #include "screen.h"
 #include "sdlutils.h"
 #include "fk_menu.h"
+#include "fk_instant_play.h"
 
 // Globals
 const SDL_Color Globals::g_colorTextNormal = {COLOR_TEXT_NORMAL};
@@ -120,6 +121,9 @@ int main(int argc, char *argv[])
 
     // Init menu
     FK_InitMenu();
+
+    // Init Instant Play
+    FK_InitInstantPlay();
 
     // Create instances
     CResourceManager::instance();
