@@ -435,8 +435,7 @@ void FK_InitMenu(void)
 #endif
 #ifdef HAS_MENU_RO_RW
 	/// ----- Shell cmd ----
-	FILE *fp = popen(SHELL_CMD_RO, "r");
-	if (fp == NULL) {
+	if (system(SHELL_CMD_RO) < 0) {
 	  MENU_ERROR_PRINTF("Failed to run command %s\n", SHELL_CMD_RO);
 	}
 #endif
@@ -474,9 +473,8 @@ void FK_EndMenu(void)
 
 #ifdef HAS_MENU_RO_RW
 	/// ----- Shell cmd ----
-	FILE *fp = popen(SHELL_CMD_RO, "r");
-	if (fp == NULL) {
-	  MENU_ERROR_PRINTF("Failed to run command %s\n", SHELL_CMD_RO);
+	if (system(SHELL_CMD_RO) < 0) {
+		MENU_ERROR_PRINTF("Failed to run command %s\n", SHELL_CMD_RO);
 	}
 #endif
 
@@ -1316,8 +1314,7 @@ int FK_RunMenu(SDL_Surface *screen)
 								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ----- Shell cmd ----
-								fp = popen(read_write?SHELL_CMD_RO:SHELL_CMD_RW, "r");
-								if (fp == NULL) {
+								if (system(read_write?SHELL_CMD_RO:SHELL_CMD_RW) < 0) {
 									MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
 								}
 								else{
