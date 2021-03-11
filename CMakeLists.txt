@@ -27,6 +27,7 @@ set(DinguxCommander_SRCS
   dialog.cpp
   fileLister.cpp
   fileutils.cpp
+  fk_instant_play.c
   fk_menu.c
   keyboard.cpp
   main.cpp
