@@ -229,10 +229,10 @@ void hastalavista(void)
     // Free resources
     CResourceManager::instance().sdlCleanup();
     // Quit SDL
+    FK_EndMenu();
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
-    FK_EndMenu();
 }
 
 void pleaseWait(void)
