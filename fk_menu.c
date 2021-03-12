@@ -286,16 +286,6 @@ static void add_menu_zone(ENUM_MENU_TYPE menu_type)
 		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
 		break;
 #endif
-#ifdef HAS_MENU_EXIT
-	case MENU_TYPE_EXIT:
-		MENU_DEBUG_PRINTF("Init MENU_TYPE_EXIT\n");
-		/// ------ Text ------
-		text_surface = TTF_RenderText_Blended(menu_title_font, "EXIT APP", text_color);
-		text_pos.x = (surface->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
-		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
-		break;
-#endif
 #ifdef HAS_MENU_USB
 	case MENU_TYPE_USB:
 		MENU_DEBUG_PRINTF("Init MENU_TYPE_USB\n");
@@ -331,16 +321,6 @@ static void add_menu_zone(ENUM_MENU_TYPE menu_type)
 		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
 		break;
 #endif
-#ifdef HAS_MENU_POWERDOWN
-	case MENU_TYPE_POWERDOWN:
-		MENU_DEBUG_PRINTF("Init MENU_TYPE_POWERDOWN\n");
-		/// ------ Text ------
-		text_surface = TTF_RenderText_Blended(menu_title_font, "POWERDOWN", text_color);
-		text_pos.x = (surface->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
-		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
-		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
-		break;
-#endif
 #ifdef HAS_MENU_RO_RW
 	case MENU_TYPE_RO_RW:
 		MENU_DEBUG_PRINTF("Init MENU_TYPE_RO_RW\n");
@@ -350,6 +330,26 @@ static void add_menu_zone(ENUM_MENU_TYPE menu_type)
 		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2 - padding_y_from_center_menu_zone*2;
 		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
 	    break;
+#endif
+#ifdef HAS_MENU_EXIT
+	case MENU_TYPE_EXIT:
+		MENU_DEBUG_PRINTF("Init MENU_TYPE_EXIT\n");
+		/// ------ Text ------
+		text_surface = TTF_RenderText_Blended(menu_title_font, "EXIT APP", text_color);
+		text_pos.x = (surface->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
+		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
+		break;
+#endif
+#ifdef HAS_MENU_POWERDOWN
+	case MENU_TYPE_POWERDOWN:
+		MENU_DEBUG_PRINTF("Init MENU_TYPE_POWERDOWN\n");
+		/// ------ Text ------
+		text_surface = TTF_RenderText_Blended(menu_title_font, "POWERDOWN", text_color);
+		text_pos.x = (surface->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
+		text_pos.y = surface->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
+		SDL_BlitSurface(text_surface, NULL, surface, &text_pos);
+		break;
 #endif
 	default:
 		MENU_DEBUG_PRINTF("Warning - In add_menu_zone, unknown MENU_TYPE: %d\n", menu_type);
