@@ -42,13 +42,16 @@
 /* Handler for SIGUSR1, caused by closing the console */
 static void handle_sigusr1(int signal)
 {
+    FILE *fp;
+
     printf("Caught signal USR1(%d)\n", signal);
 
     /* Exit menu if it was launched */
     FK_EndMenu();
 
     /* Send command to cancel any previously scheduled powerdown */
-    if (popen(SHELL_CMD_CANCEL_SCHED_POWERDOWN, "r") == NULL)
+    fp = popen(SHELL_CMD_CANCEL_SCHED_POWERDOWN, "r");
+    if (fp == NULL)
     {
         /* Countdown is still ticking, so better do nothing
            than start writing and get interrupted!
@@ -56,6 +59,7 @@ static void handle_sigusr1(int signal)
         printf("Failed to cancel scheduled shutdown\n");
         exit(0);
     }
+    pclose(fp);
 
     /* Perform Instant Play save and shutdown */
     execlp(SHELL_CMD_POWERDOWN, SHELL_CMD_POWERDOWN);

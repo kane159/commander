@@ -502,6 +502,7 @@ static void init_menu_system_values(void)
 		volume_percentage = 50; ///wrong value: setting default to 50
 	}
 	else{
+		pclose(fp);
 		fgets(res, sizeof(res)-1, fp);
 
 		/// Check if Volume is a number (at least the first char)
@@ -523,6 +524,7 @@ static void init_menu_system_values(void)
 		brightness_percentage = 50; ///wrong value: setting default to 50
 	}
 	else{
+		pclose(fp);
 		fgets(res, sizeof(res)-1, fp);
 
 		/// Check if brightness is a number (at least the first char)
@@ -1011,6 +1013,7 @@ int FK_RunMenu(SDL_Surface *screen)
 							if (fp == NULL) {
 								MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
 							}
+							pclose(fp);
 
 							/// ------ Refresh screen ------
 							screen_refresh = 1;
@@ -1029,6 +1032,8 @@ int FK_RunMenu(SDL_Surface *screen)
 							if (fp == NULL) {
 								MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
 							}
+							pclose(fp);
+
 							/// ------ Refresh screen ------
 							screen_refresh = 1;
 						} else
@@ -1085,6 +1090,8 @@ int FK_RunMenu(SDL_Surface *screen)
 							if (fp == NULL) {
 								MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
 							}
+							pclose(fp);
+
 							/// ------ Refresh screen ------
 							screen_refresh = 1;
 						} else
@@ -1102,6 +1109,8 @@ int FK_RunMenu(SDL_Surface *screen)
 							if (fp == NULL) {
 								MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
 							}
+							pclose(fp);
+
 							/// ------ Refresh screen ------
 							screen_refresh = 1;
 						} else
@@ -1194,6 +1203,7 @@ int FK_RunMenu(SDL_Surface *screen)
 									MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
 								}
 								else{
+									pclose(fp);
 									usb_sharing = !usb_sharing;
 								}*/
 
@@ -1294,7 +1304,7 @@ int FK_RunMenu(SDL_Surface *screen)
 								if (fp == NULL) {
 									MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
 								}
-
+								pclose(fp);
 								return MENU_RETURN_EXIT;
 							}
 							else{
