@@ -502,8 +502,8 @@ static void init_menu_system_values(void)
 		volume_percentage = 50; ///wrong value: setting default to 50
 	}
 	else{
-		pclose(fp);
 		fgets(res, sizeof(res)-1, fp);
+		pclose(fp);
 
 		/// Check if Volume is a number (at least the first char)
 		if(res[0] < '0' || res[0] > '9'){
