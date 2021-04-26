@@ -126,6 +126,9 @@ typedef enum {ASPECT_RATIOS} ENUM_ASPECT_RATIOS_TYPES;
 #define SHELL_CMD_RW                        "rw"
 #endif
 
+#define SHELL_CMD_KEYMAP_DEFAULT            "keymap default"
+#define SHELL_CMD_KEYMAP_RESUME             "keymap resume"
+
 #ifdef HAS_MENU_THEME
 extern void FK_InitMenu(Configuration &c);
 #else

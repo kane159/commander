@@ -875,6 +875,9 @@ int FK_RunMenu(SDL_Surface *screen)
 #endif
 	int returnCode = MENU_RETURN_OK;
 
+	/// ------ Load default keymap ------
+	system(SHELL_CMD_KEYMAP_DEFAULT);
+
 	/// ------ Get System values -------
 	init_menu_system_values();
 	int prevItem=menuItem;
@@ -1386,6 +1389,9 @@ int FK_RunMenu(SDL_Surface *screen)
 		/// --------- reset screen refresh ---------
 		screen_refresh = 0;
 	}
+
+	/// ------ Restore last keymap ------
+	system(SHELL_CMD_KEYMAP_RESUME);
 
 	/// ------ Reset prev key repeat params -------
 	if(SDL_EnableKeyRepeat(backup_key_repeat_delay, backup_key_repeat_interval)){
