@@ -867,7 +867,6 @@ int FK_RunMenu(SDL_Surface *screen)
 	int start_scroll=0;
 	uint8_t screen_refresh = 1;
 	char shell_cmd[100];
-	FILE *fp;
 	uint8_t menu_confirmation = 0;
 	stop_menu_loop = 0;
 #ifdef HAS_MENU_THEME
@@ -1012,11 +1011,7 @@ int FK_RunMenu(SDL_Surface *screen)
 
 							/// ----- Shell cmd ----
 							sprintf(shell_cmd, "%s %d", SHELL_CMD_VOLUME_SET, volume_percentage);
-							fp = popen(shell_cmd, "r");
-							if (fp == NULL) {
-								MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
-							}
-							pclose(fp);
+							system(shell_cmd);
 
 							/// ------ Refresh screen ------
 							screen_refresh = 1;
@@ -1031,11 +1026,7 @@ int FK_RunMenu(SDL_Surface *screen)
 
 							/// ----- Shell cmd ----
 							sprintf(shell_cmd, "%s %d", SHELL_CMD_BRIGHTNESS_SET, brightness_percentage);
-							fp = popen(shell_cmd, "r");
-							if (fp == NULL) {
-								MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
-							}
-							pclose(fp);
+							system(shell_cmd);
 
 							/// ------ Refresh screen ------
 							screen_refresh = 1;
@@ -1089,11 +1080,7 @@ int FK_RunMenu(SDL_Surface *screen)
 
 							/// ----- Shell cmd ----
 							sprintf(shell_cmd, "%s %d", SHELL_CMD_VOLUME_SET, volume_percentage);
-							fp = popen(shell_cmd, "r");
-							if (fp == NULL) {
-								MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
-							}
-							pclose(fp);
+							system(shell_cmd);
 
 							/// ------ Refresh screen ------
 							screen_refresh = 1;
@@ -1108,11 +1095,7 @@ int FK_RunMenu(SDL_Surface *screen)
 
 							/// ----- Shell cmd ----
 							sprintf(shell_cmd, "%s %d", SHELL_CMD_BRIGHTNESS_SET, brightness_percentage);
-							fp = popen(shell_cmd, "r");
-							if (fp == NULL) {
-								MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
-							}
-							pclose(fp);
+							system(shell_cmd);
 
 							/// ------ Refresh screen ------
 							screen_refresh = 1;
@@ -1201,15 +1184,7 @@ int FK_RunMenu(SDL_Surface *screen)
 								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ----- Shell cmd ----
-								/*fp = popen(usb_sharing?SHELL_CMD_USB_UNMOUNT:SHELL_CMD_USB_MOUNT, "r");
-								if (fp == NULL) {
-									MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
-								}
-								else{
-									pclose(fp);
-									usb_sharing = !usb_sharing;
-								}*/
-
+								/*system(usb_sharing?SHELL_CMD_USB_UNMOUNT:SHELL_CMD_USB_MOUNT);*/
 								bool res = Utils::executeRawPath(usb_sharing?SHELL_CMD_USB_UNMOUNT:SHELL_CMD_USB_MOUNT);
 								if (!res) {
 									MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
@@ -1302,12 +1277,7 @@ int FK_RunMenu(SDL_Surface *screen)
 								menu_screen_refresh(screen, menuItem, prevItem, scroll, menu_confirmation, 1);
 
 								/// ----- Shell cmd ----
-								sprintf(shell_cmd, "%s", SHELL_CMD_POWERDOWN);
-								fp = popen(shell_cmd, "r");
-								if (fp == NULL) {
-									MENU_ERROR_PRINTF("Failed to run command %s\n", shell_cmd);
-								}
-								pclose(fp);
+								system(SHELL_CMD_POWERDOWN);
 								return MENU_RETURN_EXIT;
 							}
 							else{
