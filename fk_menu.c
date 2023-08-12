@@ -802,7 +802,7 @@ static void menu_screen_refresh(SDL_Surface *screen, int menuItem, int prevItem,
 #ifdef HAS_MENU_RO_RW
 		case MENU_TYPE_RO_RW:
 			sprintf(text_tmp, "%s", read_write?"唯讀":"可讀寫");
-			text_surface = TTF_RenderText_Blended(menu_title_font, text_tmp, text_color);
+			text_surface = TTF_RenderUTF8_Blended(menu_title_font, text_tmp, text_color);
 			text_pos.x = (screen->w - MENU_ZONE_WIDTH)/2 + (MENU_ZONE_WIDTH - text_surface->w)/2;
 			text_pos.y = screen->h - MENU_ZONE_HEIGHT/2 - text_surface->h/2;
 			SDL_BlitSurface(text_surface, NULL, screen, &text_pos);
