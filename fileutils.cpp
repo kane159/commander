@@ -214,10 +214,10 @@ OverwriteDialogResult OverwriteDialog(
         dlg.addOption(text);
         options.push_back(value);
     };
-    add_option("Yes", OverwriteDialogResult::YES);
-    if (!is_last) add_option("Yes to all", OverwriteDialogResult::YES_TO_ALL);
-    add_option("No", OverwriteDialogResult::NO);
-    if (!is_last) add_option("Cancel", OverwriteDialogResult::CANCEL);
+    add_option("是", OverwriteDialogResult::YES);
+    if (!is_last) add_option("執行所有", OverwriteDialogResult::YES_TO_ALL);
+    add_option("否", OverwriteDialogResult::NO);
+    if (!is_last) add_option("取消", OverwriteDialogResult::CANCEL);
     dlg.init();
     auto res = options[dlg.execute()];
     SDL_utils::renderAll();
@@ -267,7 +267,7 @@ void ActionToDir(const std::vector<std::string> &inputs,
         const auto action_result = action_fn(input, dest_filename);
         if (!action_result.ok())
         {
-            std::string title = "Error ";
+            std::string title = "錯誤 ";
             title += AsciiToLower(action_desc[0]);
             title.append(action_desc.data() + 1, action_desc.size() - 1);
             switch (ErrorDialog(title, action_result.message(), is_last))
@@ -469,11 +469,11 @@ void File_utils::diskInfo(void)
             std::istream_iterator<std::string>(),
             std::back_inserter<std::vector<std::string>>(l_tokens));
         // Display dialog
-        CDialog l_dialog{"Disk information:"};
-        l_dialog.addLabel("Size: " + l_tokens[1]);
-        l_dialog.addLabel("Used: " + l_tokens[2] + " (" + l_tokens[4] + ")");
-        l_dialog.addLabel("Available: " + l_tokens[3]);
-        l_dialog.addOption("OK");
+        CDialog l_dialog{"磁盤信息:"};
+        l_dialog.addLabel("大小: " + l_tokens[1]);
+        l_dialog.addLabel("已使用: " + l_tokens[2] + " (" + l_tokens[4] + ")");
+        l_dialog.addLabel("可用: " + l_tokens[3]);
+        l_dialog.addOption("確定");
         l_dialog.init();
         l_dialog.execute();
     }
@@ -515,11 +515,11 @@ void File_utils::diskUsed(const std::vector<std::string> &p_files)
     }
     // Dialog
     std::ostringstream l_stream;
-    CDialog l_dialog{"Disk used:"};
-    l_stream << p_files.size() << " items selected";
+    CDialog l_dialog{"磁盤佔用:"};
+    l_stream << p_files.size() << " 已選項目";
     l_dialog.addLabel(l_stream.str());
-    l_dialog.addLabel("Disk used: " + l_line);
-    l_dialog.addOption("OK");
+    l_dialog.addLabel("磁盤佔用: " + l_line);
+    l_dialog.addOption("確定");
     l_dialog.init();
     l_dialog.execute();
 }

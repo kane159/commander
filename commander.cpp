@@ -284,7 +284,7 @@ const bool CCommander::openCopyMenu(void) const
     {
         bool l_loop(false);
         std::ostringstream l_stream;
-        l_stream << l_list.size() << " selected:";
+        l_stream << l_list.size() << " 选择:";
         // File operation dialog
         CDialog l_dialog { l_stream.str(), {}, [this, &l_dialog]() {
                               return Y_LIST_PHYS
@@ -292,20 +292,20 @@ const bool CCommander::openCopyMenu(void) const
                                   * l_dialog.line_height();
                           } };
 
-        l_dialog.addOption(m_panelSource == &m_panelLeft ? "Copy >" : "< Copy");
+        l_dialog.addOption(m_panelSource == &m_panelLeft ? "複製 >" : "< 複製");
         handlers.push_back([&]() {
             File_utils::copyFile(l_list, m_panelTarget->getCurrentPath());
             return true;
         });
 
-        l_dialog.addOption(m_panelSource == &m_panelLeft ? "Move >" : "< Move");
+        l_dialog.addOption(m_panelSource == &m_panelLeft ? "移動 >" : "< 移動");
         handlers.push_back([&]() {
             File_utils::moveFile(l_list, m_panelTarget->getCurrentPath());
             return true;
         });
 
         
-        l_dialog.addOption(m_panelSource == &m_panelLeft ? "Symlink >" : "< Symlink");
+        l_dialog.addOption(m_panelSource == &m_panelLeft ? "軟連結 >" : "< 軟連結");
         handlers.push_back([&]() {
             File_utils::symlinkFile(l_list, m_panelTarget->getCurrentPath());
             return true;
@@ -313,7 +313,7 @@ const bool CCommander::openCopyMenu(void) const
 
         if (l_list.size() == 1) {
             // The rename option appears only if one item is selected
-            l_dialog.addOption("Rename");
+            l_dialog.addOption("重命名");
             handlers.push_back([&]() {
                 CKeyboard l_keyboard(m_panelSource->getHighlightedItem());
                 if (l_keyboard.execute() == 1 && !l_keyboard.getInputText().empty() && l_keyboard.getInputText() != m_panelSource->getHighlightedItem())
@@ -325,14 +325,14 @@ const bool CCommander::openCopyMenu(void) const
             });
         }
 
-        l_dialog.addOption("Delete");
+        l_dialog.addOption("刪除");
         handlers.push_back([&]() {
             File_utils::removeFile(l_list);
             return true;
         });
         const int delete_option = handlers.size(); 
 
-        l_dialog.addOption("Disk used");
+        l_dialog.addOption("磁盤佔用");
         handlers.push_back([&]() {
             File_utils::diskUsed(l_list);
             return false;
@@ -354,8 +354,8 @@ const bool CCommander::openCopyMenu(void) const
                             + (l_dialog.getHighlightedIndex() + 1)
                             * l_dialog.line_height();
                     } };
-                l_dialog2.addOption("Yes");
-                l_dialog2.addOption("No");
+                l_dialog2.addOption("是");
+                l_dialog2.addOption("否");
                 l_dialog2.init();
                 if (l_dialog2.execute() != 1)
                     l_loop = true;
@@ -376,16 +376,16 @@ const bool CCommander::openSystemMenu(void)
     int l_dialogRetVal(0);
     // Selection dialog
     {
-        CDialog l_dialog { "System:", {}, [this, &l_dialog]() {
+        CDialog l_dialog { "系統:", {}, [this, &l_dialog]() {
                               return Y_LIST_PHYS
                                   + m_panelSource->getHighlightedIndexRelative()
                                   * l_dialog.line_height();
                           } };
-        l_dialog.addOption("Select all");
-        l_dialog.addOption("Select none");
-        l_dialog.addOption("New directory");
-        l_dialog.addOption("Disk info");
-        l_dialog.addOption("Quit");
+        l_dialog.addOption("全選");
+        l_dialog.addOption("取消選擇");
+        l_dialog.addOption("新增文件夾");
+        l_dialog.addOption("磁盤信息");
+        l_dialog.addOption("退出");
         l_dialog.init();
         l_dialogRetVal = l_dialog.execute();
     }
@@ -450,8 +450,8 @@ OpenFileResult OpenFileDialog(const std::string &path,
         dlg.addOption(text);
         options.push_back(value);
     };
-    add_option("View", OpenFileResult::VIEW);
-    add_option("Execute", OpenFileResult::EXECUTE);
+    add_option("查看", OpenFileResult::VIEW);
+    add_option("執行", OpenFileResult::EXECUTE);
     dlg.init();
     return options[dlg.execute()];
 }
@@ -462,7 +462,7 @@ void ViewFile(const std::string &path)
     constexpr std::size_t kMaxFileSize = 16777216; // = 16 MB
     const auto file_size = File_utils::getFileSize(path);
     if (file_size > kMaxFileSize) {
-        ErrorDialog(path, "Error:", "File too large (>16 MiB)");
+        ErrorDialog(path, "錯誤:", "文件過大 (>16 MiB)");
     } else {
         ImageViewer image_viewer(path);
         if (image_viewer.ok()) {
