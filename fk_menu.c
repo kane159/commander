@@ -62,11 +62,11 @@
 #define MENU_BG_SQURE_WIDTH         180
 #define MENU_BG_SQUREE_HEIGHT       140
 
-#define MENU_FONT_NAME_TITLE        "/usr/games/layouts/Bigcup/unifont-15.0.01.ttf"
+#define MENU_FONT_NAME_TITLE        "/usr/games/skin/font.ttf"
 #define MENU_FONT_SIZE_TITLE        22
-#define MENU_FONT_NAME_INFO         "/usr/games/layouts/Bigcup/unifont-15.0.01.ttf"
+#define MENU_FONT_NAME_INFO         "/usr/games/skin/font.ttf"
 #define MENU_FONT_SIZE_INFO         16
-#define MENU_FONT_NAME_SMALL_INFO   "/usr/games/layouts/Bigcup/unifont-15.0.01.ttf"
+#define MENU_FONT_NAME_SMALL_INFO   "/usr/games/skin/font.ttf"
 #define MENU_FONT_SIZE_SMALL_INFO   13
 #define MENU_PNG_BG_PATH            "/usr/games/menu_resources/zone_bg.png"
 #define MENU_PNG_ARROW_TOP_PATH     "/usr/games/menu_resources/arrow_top.png"
